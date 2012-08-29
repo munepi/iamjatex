@@ -1,0 +1,77 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{iamjatex}
+  [2011/10/16 v0.1 defines iamjatex (I am Just Another TeXnician) environment]
+
+\newif\if@iamjatexdebug \@iamjatexdebugfalse
+\DeclareOption{debug}{\@iamjatexdebugtrue}
+
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{iamjatex}}
+\ProcessOptions\relax
+
+%% take verbatim env. from latex.ltx
+%% define iamjatex
+\begingroup \catcode `|=0 \catcode `[= 1
+\catcode`]=2 \catcode `\{=12 \catcode `\}=12
+\catcode`\\=12 
+|gdef|@xiamjatex#1\end{iamjatex}[|@iamjatex@aa[#1]|end[iamjatex]]
+|endgroup
+\def\@iamjatex{\trivlist \item\relax
+  \if@minipage\else\vskip\parskip\fi
+  \leftskip\@totalleftmargin\rightskip\z@skip
+  \parindent\z@\parfillskip\@flushglue\parskip\z@skip
+  \@@par
+  \@tempswafalse
+  \def\par{%
+    \if@tempswa
+      \leavevmode \null \@@par\penalty\interlinepenalty
+    \else
+      \@tempswatrue
+      \ifhmode\@@par\penalty\interlinepenalty\fi
+    \fi}%
+  \let\do\@makeother \dospecials
+  \obeylines \iamjatex@font \@noligs
+  \hyphenchar\font\m@ne
+  \everypar \expandafter{\the\everypar \unpenalty}%
+}
+\def\iamjatex{\@iamjatex \frenchspacing\@vobeyspaces \@xiamjatex}
+\def\endiamjatex{\if@newlist \leavevmode\fi\endtrivlist}
+\def\iamjatex@font{\normalfont\sffamily\Huge}
+
+%% Don Knuth, H. Okumura AA: characters: #@%&X27/1:. 
+\newif\if@iamjatexchar \@iamjatexcharfalse
+\def\@iamjatex@aa#1{%
+ \@iamjatexcharfalse
+ \@tempcnta 65\relax
+ \def\space{\ }%
+ \@tfor\ch@r:=#1\do{%
+   \def\@tempchar{X}%is a flag to output ``iamjatexchar''
+   \ifx\ch@r\@tempchar\relax
+     %%A-Z (65-90)
+     \ifnum\@tempcnta>64\relax \ifnum\@tempcnta<91\relax \@iamjatexchartrue\fi\fi
+     %%a-z (97-122)
+     \ifnum\@tempcnta>96\relax \ifnum\@tempcnta<123\relax \@iamjatexchartrue\fi\fi
+     \if@iamjatexchar
+       \char\@tempcnta%
+       \if@iamjatexdebug $_{(\number\@tempcnta)}$\fi
+       \@iamjatexcharfalse
+       \@tempcnta 65\relax
+     \fi
+     %%output \space if \@tempcnta is over 123
+     \ifnum\@tempcnta>122\relax
+       \if@iamjatexdebug \textvisiblespace\else\space\fi
+       \@tempcnta 65\relax
+     \fi
+   \else
+     %%1, 2, 7 are plus factors of \@tempcnta
+     \def\@tempchar{1}%
+     \ifx\ch@r\@tempchar\relax \advance\@tempcnta\@tempchar\fi
+     \def\@tempchar{2}%
+     \ifx\ch@r\@tempchar\relax \advance\@tempcnta\@tempchar\fi
+     \def\@tempchar{7}%
+     \ifx\ch@r\@tempchar\relax \advance\@tempcnta\@tempchar\fi
+   \fi
+ }%
+}
+
+
+\endinput
